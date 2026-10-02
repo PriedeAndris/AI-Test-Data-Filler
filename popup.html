@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+  <style>body { width: 320px; }</style>
+</head>
+<body>
+  <h1>AI Test Data Filler</h1>
+  <div id="provider" class="muted"></div>
+
+  <label for="lang">Language of free text</label>
+  <input type="text" id="lang" placeholder="English">
+  <div class="note">Only for comments and descriptions, not names or addresses.</div>
+
+  <label for="notes">Extra instructions (optional)</label>
+  <textarea id="notes" placeholder="e.g. company customer, person aged 30–40, long comment"></textarea>
+
+  <div class="check"><input type="checkbox" id="randomChoices" checked><label for="randomChoices">Pick drop-downs and radio buttons randomly</label></div>
+  <div class="check"><input type="checkbox" id="overwrite"><label for="overwrite">Overwrite fields that already have a value</label></div>
+
+  <button id="fill" class="primary">Fill this page</button>
+
+  <div class="box">
+    <div><b>Large-data test</b></div>
+    <div class="note">Fields that state a limit (maxlength, a counter like 0/500, or text like "max 500 characters") get AI-written text of exactly that length. Long texts end with END, so you can see if the form cuts them off. Fields with no stated limit get normal data. Replaces values already in text fields.</div>
+    <button id="fillMax" class="primary" style="background:#444">Fill with maximum values</button>
+  </div>
+
+  <div id="status" class="status"></div>
+  <p><a href="#" id="setup">Setup / API key</a></p>
+  <script src="popup.js"></script>
+</body>
+</html>

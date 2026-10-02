@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Test form for AI Test Data Filler</title>
+  <style>
+    body { font: 15px system-ui, sans-serif; max-width: 600px; margin: 24px auto; padding: 0 12px; }
+    label { display: block; margin: 10px 0 3px; font-weight: 600; }
+    input, select, textarea { width: 100%; padding: 6px; box-sizing: border-box; }
+    small { color: #666; display: block; }
+    .inline label, .inline input { display: inline; width: auto; font-weight: normal; }
+    fieldset { margin-top: 14px; }
+    h2 { margin: 28px 0 6px; font-size: 16px; }
+    button { padding: 7px 12px; cursor: pointer; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 8px; }
+    td, th { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+    .pass { color: #0a7d2c; font-weight: 600; }
+    .fail { color: #b00020; font-weight: 600; }
+    .note { background: #f3f6ff; border: 1px solid #cdd8ff; padding: 8px 10px; font-size: 13px; }
+    #log { white-space: pre-wrap; font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Registration (test form)</h1>
+  <p class="note">
+    <b>How to use:</b> click the extension, press <i>Fill this page</i> or <i>Fill with maximum values</i>, then press
+    <b>Check results</b> at the bottom. Nothing on this page is ever submitted to a server.
+  </p>
+
+  <form id="f" onsubmit="event.preventDefault(); document.getElementById('log').textContent = 'SUBMIT WAS TRIGGERED';">
+    <h2>Person</h2>
+    <label for="first">First name</label><input id="first" name="first_name" type="text" required>
+    <label for="last">Surname (maxlength 12)</label><input id="last" name="last_name" type="text" maxlength="12">
+    <label for="mail">Email</label><input id="mail" name="email" type="email" required>
+    <label for="tel">Phone</label><input id="tel" name="phone" type="tel" placeholder="include country code">
+    <label for="age">Age (18–65)</label><input id="age" name="age" type="number" min="18" max="65">
+    <label for="dob">Date of birth</label><input id="dob" name="dob" type="date">
+    <label for="when">Preferred time</label><input id="when" name="time" type="time">
+    <label for="site">Website</label><input id="site" name="website" type="url">
+
+    <h2>Address (should follow the country that gets selected)</h2>
+    <label for="country">Country</label>
+    <select id="country" name="country">
+      <option value="">Choose…</option>
+      <option value="lv">Latvia</option><option value="ee">Estonia</option><option value="lt">Lithuania</option>
+      <option value="de">Germany</option><option value="gb">United Kingdom</option>
+    </select>
+    <label for="region">Region (list loads about half a second after the country changes)</label>
+    <select id="region" name="region" disabled><option value="">Choose a country first</option></select>
+    <label for="city">City</label><input id="city" name="city" type="text">
+    <label for="street">Street address</label><input id="street" name="street" type="text">
+    <label for="zip">Postal code</label><input id="zip" name="zip" type="text">
+
+    <h2>Free text: limits for the "maximum values" button</h2>
+    <label for="bio">About you (states NO limit: gets normal AI text, even with the max button)</label>
+    <textarea id="bio" name="bio" rows="3"></textarea>
+    <div><label for="desc">Description</label><textarea id="desc" name="description" rows="3"></textarea><small id="desc-count">0 / 300</small></div>
+    <div><label for="memo">Memo</label><input id="memo" name="memo" type="text"><small>Maximum 60 characters</small></div>
+    <div><label for="memo2">Piezīmes</label><input id="memo2" name="piezimes" type="text"><small>līdz 25 simboliem</small></div>
+    <label for="short">Short note (maxlength 40)</label><input id="short" name="short_note" type="text" maxlength="40">
+    <label for="mail2">Work email (maxlength 80)</label><input id="mail2" name="work_email" type="email" maxlength="80">
+    <label for="ref">Reference code (pattern AB-1234, maxlength 7)</label>
+    <input id="ref" name="reference" type="text" pattern="[A-Z]{2}-[0-9]{4}" maxlength="7">
+
+    <fieldset><legend>Customer type</legend>
+      <div class="inline"><input type="radio" id="r1" name="ctype" value="private"><label for="r1">Private</label>
+      <input type="radio" id="r2" name="ctype" value="company"><label for="r2">Company</label></div>
+    </fieldset>
+
+    <div class="inline" style="margin-top:12px"><input type="checkbox" id="news" name="newsletter"><label for="news">Send me the newsletter</label></div>
+
+    <h2>Must be left alone</h2>
+    <label for="pw">Password (must stay empty)</label><input id="pw" name="password" type="password">
+    <label for="cc">Card number (must stay empty)</label><input id="cc" name="card_number" type="text" autocomplete="cc-number">
+    <label for="pre">Nickname</label>
+    <small>Starts with the value "keep me". Kept by Fill this page unless Overwrite is ticked. The max button replaces it.</small>
+    <input id="pre" name="nickname" type="text" value="keep me">
+
+    <button type="submit" style="margin-top:16px">Submit (the extension must never click this)</button>
+  </form>
+
+  <h2>Results</h2>
+  <button type="button" id="check">Check results</button>
+  <div id="out"></div>
+  <div id="log"></div>
+
+  <script>
+    // Dependent list: appears after a delay, like a region list fetched from a server.
+    const REGIONS = {
+      lv: ['Rīga', 'Vidzeme', 'Kurzeme', 'Latgale', 'Zemgale'],
+      ee: ['Harju', 'Tartu', 'Pärnu'],
+      lt: ['Vilnius', 'Kaunas', 'Klaipėda'],
+      de: ['Bayern', 'Berlin', 'Hessen'],
+      gb: ['England', 'Scotland', 'Wales'],
+    };
+    const country = document.getElementById('country');
+    const region = document.getElementById('region');
+    country.addEventListener('change', () => {
+      region.disabled = true;
+      region.innerHTML = '<option value="">Loading…</option>';
+      setTimeout(() => {
+        const list = REGIONS[country.value] ?? [];
+        region.innerHTML = '<option value="">Choose…</option>' + list.map((r) => `<option>${r}</option>`).join('');
+        region.disabled = list.length === 0;
+      }, 500);
+    });
+
+    // Live counter like many real forms have. It also blocks input beyond 300, as a JavaScript-enforced limit would.
+    const desc = document.getElementById('desc');
+    const counter = document.getElementById('desc-count');
+    desc.addEventListener('input', () => {
+      if (desc.value.length > 300) desc.value = desc.value.slice(0, 300);
+      counter.textContent = `${desc.value.length} / 300`;
+    });
+
+    const DIAL = { lv: '+371', ee: '+372', lt: '+370', de: '+49', gb: '+44' };
+    const v = (id) => document.getElementById(id).value;
+    const row = (name, value, verdict, cls) =>
+      `<tr><td>${name}</td><td>${value}</td><td class="${cls}">${verdict}</td></tr>`;
+    const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+
+    document.getElementById('check').onclick = () => {
+      const rows = [];
+      const ok = (name, value, good, detail = '') => rows.push(row(name, esc(value), good ? `PASS ${detail}` : `FAIL ${detail}`, good ? 'pass' : 'fail'));
+
+      // Limits that the max button must hit exactly (after "Fill with maximum values")
+      const limits = { last: 12, desc: 300, memo: 60, memo2: 25, short: 40, mail2: 80, ref: null };
+      const maxMode = v('desc').length === 300 && v('desc').endsWith(' END');
+      if (maxMode) {
+        for (const [id, n] of Object.entries(limits)) {
+          if (n === null) {
+            ok('reference (has a pattern)', v(id) || '(empty)', v(id) === '', '- text cannot fit the pattern, so it must stay empty');
+            continue;
+          }
+          const val = v(id);
+          const endOk = n < 40 || id === 'mail2' || val.endsWith(' END'); // emails can't carry the END marker
+          ok(`${id} (limit ${n})`, `${val.length} chars`, val.length === n && endOk, endOk ? '' : '- END missing');
+        }
+        ok('description is real text, not lorem ipsum', v('desc').slice(0, 90) + '…', !/lorem ipsum/i.test(v('desc')));
+        ok('memo is real text', v('memo').slice(0, 60), !/lorem ipsum/i.test(v('memo')));
+        ok('bio (no stated limit) got normal data', v('bio') === '' ? '(empty)' : `${v('bio').length} chars`, v('bio') !== '' && v('bio').length < 1500, '- must be filled, not stretched');
+        ok('first name filled', v('first') || '(empty)', v('first') !== '');
+        ok('password stayed empty', v('pw') === '' ? '(empty)' : 'FILLED', v('pw') === '');
+        ok('card number stayed empty', v('cc') === '' ? '(empty)' : 'FILLED', v('cc') === '');
+      } else {
+        // Normal fill: values valid and consistent with the selected country
+        const c = country.value;
+        ok('country picked', c || '(none)', Boolean(c));
+        ok('region matches the country', v('region') || '(none)', Boolean(v('region')) && (REGIONS[c] ?? []).includes(v('region')), '- needs the list to load first');
+        ok('phone has the country dialing code', v('tel') || '(empty)', Boolean(c) && v('tel').replace(/\s/g, '').startsWith(DIAL[c] ?? '#'), `- expected ${DIAL[c] ?? '?'}`);
+        ok('postal code filled', v('zip') || '(empty)', Boolean(v('zip')), '- check the format fits the country by eye');
+        ok('city / street filled', `${v('city')} | ${v('street')}`, Boolean(v('city') && v('street')), '- check they fit the country by eye');
+        ok('surname within 12', v('last') || '(empty)', v('last').length > 0 && v('last').length <= 12);
+        ok('age 18-65', v('age') || '(empty)', Number(v('age')) >= 18 && Number(v('age')) <= 65);
+        const dob = v('dob') ? new Date(v('dob')) : null;
+        const now = new Date();
+        let years = dob ? now.getFullYear() - dob.getUTCFullYear() : null;
+        if (dob && (now.getMonth() < dob.getUTCMonth() || (now.getMonth() === dob.getUTCMonth() && now.getDate() < dob.getUTCDate()))) years--;
+        ok('age matches date of birth', `${v('dob') || '(no date)'} → ${years ?? '?'} years, age field ${v('age') || '(empty)'}`, dob !== null && years === Number(v('age')));
+        ok('email valid', v('mail') || '(empty)', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('mail')));
+        ok('customer type chosen', document.querySelector('input[name=ctype]:checked')?.value || '(none)', Boolean(document.querySelector('input[name=ctype]:checked')));
+        ok('password stayed empty', v('pw') === '' ? '(empty)' : 'FILLED', v('pw') === '');
+        ok('card number stayed empty', v('cc') === '' ? '(empty)' : 'FILLED', v('cc') === '');
+        rows.push(row('nickname (started as "keep me")', esc(v('pre')), v('pre') === 'keep me' ? 'KEPT: correct if Overwrite is off' : 'REPLACED: correct if Overwrite is on', 'pass'));
+      }
+      document.getElementById('out').innerHTML =
+        `<p><b>Mode detected:</b> ${maxMode ? 'maximum values' : 'normal fill'}</p>` +
+        `<table><tr><th>Check</th><th>Value</th><th>Result</th></tr>${rows.join('')}</table>`;
+    };
+  </script>
+</body>
+</html>

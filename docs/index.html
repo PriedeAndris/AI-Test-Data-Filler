@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Test Data Filler</title>
+  <meta name="description" content="Chrome extension that fills web forms with fictional test data written by your own Claude or ChatGPT API key.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>AI Test Data Filler</h1>
+  <p class="lead">Fill any web form with realistic, fictional test data in one click, written by your own Claude or ChatGPT account.</p>
+
+  <p><a class="btn" href="#install">Get the extension</a></p>
+
+  <h2>What it does</h2>
+  <ul>
+    <li>Works on the current tab of any website.</li>
+    <li>Random names, surnames, emails, addresses and text, different on every click.</li>
+    <li>Respects field types, length limits, number ranges, patterns and drop-down options.</li>
+    <li>Never submits a form, and skips password and payment card fields.</li>
+  </ul>
+
+  <h2>Bring your own AI</h2>
+  <p>On first run you choose Claude (Anthropic) or ChatGPT (OpenAI) and paste your own API key. You can save both keys, but the extension only ever contacts the one you select. Usage is billed to your account by that provider.</p>
+
+  <h2 id="install">Install</h2>
+  <div class="card">
+    <p><b>Chrome Web Store:</b> <span class="muted">link coming once the listing is approved.</span></p>
+    <p class="muted">Until then: download the project, open <code>chrome://extensions</code>, enable Developer mode, choose Load unpacked, and select the extension folder.</p>
+  </div>
+
+  <h2>Privacy</h2>
+  <p>Your key stays in your browser. Only a description of the form fields on the page is sent, and only to the provider you chose. See the full <a href="privacy.html">privacy policy</a>.</p>
+
+  <footer>AI Test Data Filler · <a href="privacy.html">Privacy policy</a></footer>
+</main>
+</body>
+</html>

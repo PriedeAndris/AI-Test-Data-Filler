@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AI Test Data Filler – Setup</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="wide">
+  <h1>AI Test Data Filler – Setup</h1>
+  <p>The extension needs your own API key to write test data. You can save a key for Claude, ChatGPT or both, and choose which one is used. Only the selected provider is ever contacted.</p>
+
+  <div class="box">
+    <label for="claudeKey">Claude (Anthropic) API key</label>
+    <input type="password" id="claudeKey" autocomplete="off" placeholder="sk-ant-…">
+    <label for="claudeModel">Model</label>
+    <input type="text" id="claudeModel">
+
+    <label for="openaiKey" style="margin-top:18px">ChatGPT (OpenAI) API key</label>
+    <input type="password" id="openaiKey" autocomplete="off" placeholder="sk-…">
+    <label for="openaiModel">Model</label>
+    <input type="text" id="openaiModel">
+  </div>
+
+  <label for="provider">Use this AI</label>
+  <select id="provider"></select>
+  <div class="note">Only providers that have a key saved can be selected.</div>
+
+  <button id="save" class="primary" style="width:auto">Save</button>
+  <button id="test">Test connection</button>
+  <div id="status" class="status"></div>
+
+  <h2>What gets sent</h2>
+  <p class="note">When you click “Fill this page”, the extension sends the AI provider you selected a description of the fillable fields on the current page: labels, names, types, placeholders, allowed options, and the option currently selected in drop-downs and radio buttons (for example a chosen country). It does not send text you typed, passwords, cookies, the page title or address, or page text. It never submits a form. Keys are stored only in this browser (not synced) and are sent only to the provider they belong to. Use a key with a low spend limit.</p>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
